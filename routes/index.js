@@ -1,8 +1,8 @@
 var express = require('express');
-const USER =require('../database/user');
-//const USER= user.model;
-//const USERSCHEMA=user.schema;
-//var valid=require("../utils/valid");
+const user =require('../database/user');
+const USER= user.model;
+const USERSCHEMA=user.schema;
+var valid=require("../utils/valid");
 var router = express.Router();
 
 /* GET home page. */
@@ -16,12 +16,12 @@ router.post('/user',async (req, res)=>{
 
   params["registerdate"]=new Date();
     //console.log(params);
-  /*if(!valid.checkParams(USERSCHEMA, params)){
+  if(!valid.checkParams(USERSCHEMA, params)){
     res.status(300).json({
       msn:"parametros incorrectos"
     });
     return;
-  }*/
+  }
   var user=new USER(params);
   var result = await user.save();
   res.status(200).json(result);
@@ -65,7 +65,36 @@ router.put('/user',async (req, res)=>{
   }
   delete params.registerdate;
   var result= await USER.finOneAndUpdate(({_id:id}, params));
-
   res.status(200).json(result);
+});
+router.patch('/user',async (req, res)=>{
+  var params=req.body;
+  var id=req.query.id;
+  if(id==null){
+      res.status(300).json({
+        msn:"falta de id del item"
+      });
+      return;
+  }
+  params["updatedate"]=new Date();
+  if(!valid.checkParams(USERSCHEMA, params)){
+    res.status(300).json({
+      msn:"parametros incorrectos"
+    });
+    return;
+  }
+  var result= await USER.finOneAndUpdate(({_id:id}, params));
+  res.status(200).json(result);
+});
+router.delete("/user",async (req, res)=>{
+  var id=req.query.id;
+  if(id==null){
+      res.status(300).json({
+        msn:"falta de id del item"
+      });
+      return;
+  }
+  var result= await USER.remove({_id: id})
+  res.status(200).json({result});
 });
 module.exports = router;
